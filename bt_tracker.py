@@ -20,7 +20,7 @@ import sdnotify
 from signal import signal, SIGPIPE, SIG_DFL
 from subprocess import check_output
 from re import findall
-from wavethings import Sensors, WavePlus, AIR_HUMIDITY, AIR_RADON_ST, AIR_RADON_LT, AIR_TEMPERATURE, AIR_PRESSURE, AIR_CO2, AIR_VOC
+from wavethings import Sensors, WavePlus, AIR_HUMIDITY, AIR_RADON_ST, AIR_RADON_LT, AIR_TEMPERATURE, AIR_PRESSURE, AIR_CO2, AIR_VOC, SENSOR_IDX_HUMIDITY, SENSOR_IDX_RADON_SHORT_TERM_AVG, SENSOR_IDX_RADON_LONG_TERM_AVG, SENSOR_IDX_TEMPERATURE, SENSOR_IDX_REL_ATM_PRESSURE, SENSOR_IDX_CO2_LVL, SENSOR_IDX_VOC_LVL
 signal(SIGPIPE,SIG_DFL)
 
 project_name = 'Bluetooth Tracker MQTT Client/Daemon'

@@ -1,7 +1,7 @@
 # Bluetooth devices Sensor MQTT Client/Daemon
 
-A simple Linux python script to query bluetooth devices, including the Mi Flora plant and the Airthings Wave Plus sensor, and send the data to an **MQTT** broker,
-e.g., the famous [Eclipse Mosquitto](https://projects.eclipse.org/projects/technology.mosquitto).
+A simple Linux python script to query bluetooth devices, including the Mi Flora plant and the Airthings Wave Plus sensor, and send the data to an **MQTT** broker.
+Can be used to integrate with Home Assistant.
 After data made the hop to the MQTT broker it can be used by home automation software, like [openHAB](https://openhab.org) or Home Assistant.
 
 ![Demo gif for command line execution](demo.gif)
@@ -25,6 +25,7 @@ Based on:
 * Currently monitors: Mi Flora sensors, Airthings Wave Plus device, Raspberry Pi temperature (in case you wish to place it outside)
 * Tested with Mi Flora / VegTrug firmware 3.2.1
 * Tested on Raspberry Pi 4
+* Tested with Home Assistant + MQTT addon
 * Highly configurable
 * Data publication via MQTT
 * Configurable topic and payload

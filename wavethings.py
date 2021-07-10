@@ -183,8 +183,6 @@ try:
         print(tableprint.row(data, width=12))
         
         waveplus.disconnect()
-        
-        sleep(SamplePeriod)
             
 finally:
     waveplus.disconnect()

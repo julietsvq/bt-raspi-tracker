@@ -8,7 +8,6 @@ import re
 import json
 import os.path
 import argparse
-from time import time, sleep, localtime, strftime
 from collections import OrderedDict
 from colorama import init as colorama_init
 from colorama import Fore, Back, Style
@@ -185,7 +184,7 @@ try:
         
         waveplus.disconnect()
         
-        time.sleep(SamplePeriod)
+        sleep(SamplePeriod)
             
 finally:
     waveplus.disconnect()

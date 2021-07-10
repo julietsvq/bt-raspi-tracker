@@ -1,5 +1,25 @@
-#Class WavePlus
+from bluepy.btle import UUID, Peripheral, Scanner, DefaultDelegate
+import sys
+import time
+import struct
+import tableprint
 
+config = ConfigParser(delimiters=('=', ), inline_comment_prefixes=('#'))
+config.optionxform = str
+try:
+    with open(os.path.join("", 'config.ini')) as config_file:
+        config.read_file(config_file)
+except IOError:
+    print_line('No configuration file "config.ini"', error=True, sd_notify=True)
+    sys.exit(1)
+
+if not config['Airthings']:
+    print_line('You need to specify your Airthings Wave Plus device serial number in configuration file "config.ini"', error=True, sd_notify=True)
+    sys.exit(1)
+
+SerialNumber = config['Airthings'].getint('serial_number')
+
+#Class WavePlus
 class WavePlus():       
     def __init__(self, SerialNumber):
         self.periph        = None

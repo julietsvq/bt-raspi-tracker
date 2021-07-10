@@ -127,27 +127,28 @@ This can be done either by using the internal daemon or cron.
 
 If you run the code to get the raspi temp (vcgencmd command) you will need to add this group to the daemon user
    
-	```shell
-	sudo usermod -aG video daemon
-	```
+```shell
+sudo usermod -aG video daemon
+```
 
-1. Systemd service - on systemd powered systems the **recommended** option
+Systemd service - on systemd powered systems the **recommended** option
 
-   ```shell
-   sudo cp /opt/bt_tracker/template.service /etc/systemd/system/bt_tracker.service
+```shell
+sudo cp /opt/bt_tracker/template.service /etc/systemd/system/bt_tracker.service
 
-   sudo systemctl daemon-reload
+sudo systemctl daemon-reload
 
-   sudo systemctl start bt_tracker.service
-   sudo systemctl status bt_tracker.service
+sudo systemctl start bt_tracker.service
+sudo systemctl status bt_tracker.service
 
-   sudo systemctl enable bt_tracker.service
-   ```
+sudo systemctl enable bt_tracker.service
+```
 
-To see daemon logs: 
-   ```shell
-	journalctl -u bttracker.service --since "1 minutes ago"
-   ```
+To see daemon logs
+
+```shell
+journalctl -u bttracker.service --since "1 minutes ago"
+```
 
 ## Integration
 

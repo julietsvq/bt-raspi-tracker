@@ -1,5 +1,4 @@
-# Configuration file for Xiaomi Mi Flora Plant Sensor MQTT Client/Daemon
-# Source: https://github.com/ThomDietrich/miflora-mqtt-daemon
+# Configuration file for Bluetooth tracker MQTT Client/Daemon
 #
 # Uncomment and adapt all settings as needed.
 # Some settings can be configured by environment variables.
@@ -7,24 +6,6 @@
 
 [General]
 
-# The operation mode of the program. Determines wether retrieved sensor data is published via MQTT or stdout/file.
-# Currently supported:
-#
-#           mqtt-json - Publish to an MQTT broker in a proprietary json format (Default)
-#          mqtt-homie - Publish to an MQTT broker following the Homie MQTT convention
-#                       (https://github.com/marvinroger/homie)
-#      mqtt-smarthome - Publish to an MQTT broker following the mqtt-smarthome proposal
-#                       (https://github.com/mqtt-smarthome/mqtt-smarthome)
-#  homeassistant-mqtt - Publish to an MQTT broker following the HomeAssistant discovery format
-#                       (https://www.home-assistant.io/docs/mqtt/discovery/)
-#         gladys-mqtt - Publish to an MQTT broker following the Gladys MQTT proposal
-#                       https://gladysassistant.com/docs/integrations/mqtt/
-#    thingsboard-json - Publish to the ThingsBoard MQTT broker
-#                       (https://thingsboard.io)
-#     wirenboard-mqtt - Publish to the Wiren Board MQTT broker
-#                       (https://wirenboard.com)
-#                json - Print to stdout as json encoded strings
-#
 #reporting_method = mqtt-json
 
 # The bluetooth adapter that should be used to connect to Mi Flora devices (Default: hci0)
@@ -51,13 +32,9 @@
 # Maximum period in seconds between ping messages to the broker. (Default: 60)
 #keepalive = 60
 
-# The MQTT base topic to publish all Mi Flora sensor data topics under.
-# Default depends on the configured reporting_method
-#base_topic = miflora                   # Default for: mqtt-json, mqtt-smarthome, homeassistant-mqtt
-#base_topic = homie                     # Default for: mqtt-homie
-#base_topic = gladys/master/device      # Default for: gladys-mqtt
-#base_topic = v1/devices/me/telemetry   # Default for: thingsboard-json
-#base_topic =                           # Default for: wirenboard-mqtt
+# The MQTT base topic to publish all sensor and Mi Flora data topics under.
+#miflora_base_topic = miflora                  
+#sensor_base_topic = sensor
 
 # The MQTT broker authentification credentials (Default: no authentication)
 # Will also read from MQTT_USERNAME and MQTT_PASSWORD environment variables

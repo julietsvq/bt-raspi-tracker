@@ -230,7 +230,6 @@ try:
     waveplus.connect()
     sensors = waveplus.read()
         
-    # extract
     humidity     = str(sensors.getValue(wavethings.SENSOR_IDX_HUMIDITY))             + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_HUMIDITY))
     air_data["humidity"] = humidity
     radon_st_avg = str(sensors.getValue(wavethings.SENSOR_IDX_RADON_SHORT_TERM_AVG)) + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_RADON_SHORT_TERM_AVG))
@@ -241,16 +240,12 @@ try:
     CO2_lvl      = str(sensors.getValue(wavethings.SENSOR_IDX_CO2_LVL))              + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_CO2_LVL))
     VOC_lvl      = str(sensors.getValue(wavethings.SENSOR_IDX_VOC_LVL))              + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_VOC_LVL))
         
-    # Print data
     #airthings_data = [humidity, radon_st_avg, radon_lt_avg, temperature, pressure, CO2_lvl, VOC_lvl]        
     waveplus.disconnect()
 
     print_line('Result: {}'.format(json.dumps(air_data)))
     print()
 
-    print_line('Publishing to MQTT topic "{}/{}"'.format(sensor_base_topic, 'airthings'))
-    print()
-    mqtt_client.publish('{}/{}'.format(sensor_base_topic, 'airthings'), json.dumps(air_data))
     sleep(0.5)
 
 # MiFlora sensors

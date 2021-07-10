@@ -20,7 +20,7 @@ import sdnotify
 from signal import signal, SIGPIPE, SIG_DFL
 from subprocess import check_output
 from re import findall
-import wavethings
+from wavethings import Sensors, WavePlus, AIR_HUMIDITY, AIR_RADON_ST, AIR_RADON_LT, AIR_TEMPERATURE, AIR_PRESSURE, AIR_CO2, AIR_VOC
 signal(SIGPIPE,SIG_DFL)
 
 project_name = 'Bluetooth Tracker MQTT Client/Daemon'
@@ -216,8 +216,10 @@ print_line('Initialization complete, starting MQTT publish loop', console=False,
 while True:
 
     # Raspberry Pi 4 temperature
+    print_line('Retrieving temperature from Raspberry Pi ...')
     raspi_temp = get_temp()
-    print_line('Publishing to MQTT topic "{}" : {}°C'.format(sensor_base_topic, raspi_temp))
+    print_line('Result: {}'.format(json.dumps(raspi_temp)))
+    print_line('Publishing to MQTT topic "{}/{}"'.format(sensor_base_topic, 'raspberrypi_temp'))
     print()
     mqtt_client.publish('{}/{}'.format(sensor_base_topic, 'raspberrypi_temp'), json.dumps(raspi_temp))
     sleep(0.5)
@@ -225,14 +227,14 @@ while True:
     # Airthings Wave Plus
     try:
         print_line('Retrieving data from Airthings Wave Plus device with serial number {} ...'.format(serial_number))
-        waveplus = wavethings.WavePlus(serial_number)    
+        waveplus = WavePlus(serial_number)    
 
         air_data = OrderedDict()
         waveplus.connect()
         sensors = waveplus.read()
         
         humidity     = str(sensors.getValue(wavethings.SENSOR_IDX_HUMIDITY))             + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_HUMIDITY))
-        air_data["humidity"] = humidity
+        air_data[AIR_HUMIDITY] = humidity
         radon_st_avg = str(sensors.getValue(wavethings.SENSOR_IDX_RADON_SHORT_TERM_AVG)) + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_RADON_SHORT_TERM_AVG))
         air_data["radon_st_avg"] = radon_st_avg
         radon_lt_avg = str(sensors.getValue(wavethings.SENSOR_IDX_RADON_LONG_TERM_AVG))  + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_RADON_LONG_TERM_AVG))
@@ -240,13 +242,10 @@ while True:
         pressure     = str(sensors.getValue(wavethings.SENSOR_IDX_REL_ATM_PRESSURE))     + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_REL_ATM_PRESSURE))
         CO2_lvl      = str(sensors.getValue(wavethings.SENSOR_IDX_CO2_LVL))              + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_CO2_LVL))
         VOC_lvl      = str(sensors.getValue(wavethings.SENSOR_IDX_VOC_LVL))              + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_VOC_LVL))
-        
-        #airthings_data = [humidity, radon_st_avg, radon_lt_avg, temperature, pressure, CO2_lvl, VOC_lvl]        
+              
         waveplus.disconnect()
 
         print_line('Result: {}'.format(json.dumps(air_data)))
-        print()
-
         print_line('Publishing to MQTT topic "{}/{}"'.format(sensor_base_topic, 'airthings'))
         print()
         mqtt_client.publish('{}/{}'.format(sensor_base_topic, 'airthings'), json.dumps(air_data))

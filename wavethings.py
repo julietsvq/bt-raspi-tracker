@@ -82,6 +82,14 @@ SENSOR_IDX_REL_ATM_PRESSURE     = 4
 SENSOR_IDX_CO2_LVL              = 5
 SENSOR_IDX_VOC_LVL              = 6
 
+AIR_HUMIDITY = 'humidity'
+AIR_RADON_ST = 'radon_st_avg'
+AIR_RADON_LT = 'radon_lt_avg'
+AIR_TEMPERATURE = 'temperature'
+AIR_PRESSURE = 'pressure'
+AIR_CO2 = 'CO2_lvl'
+AIR_VOC = 'VOC_lvl'
+
 class Sensors():
     def __init__(self):
         self.sensor_version = None

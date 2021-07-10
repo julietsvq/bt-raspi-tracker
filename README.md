@@ -124,8 +124,10 @@ You most probably want to execute the program **continuously in the background**
 This can be done either by using the internal daemon or cron.
 
 **Attention:** Daemon mode must be enabled in the configuration file (default).
-(if you run the code to get the raspi temp (vcgencmd command) you will need to add this group to the daemon user: 
-   ```shell
+
+If you run the code to get the raspi temp (vcgencmd command) you will need to add this group to the daemon user
+   
+	```shell
 	sudo usermod -aG video daemon
 	```
 

@@ -3,6 +3,25 @@ import sys
 import time
 import struct
 import tableprint
+import ssl
+import re
+import json
+import os.path
+import argparse
+from time import time, sleep, localtime, strftime
+from collections import OrderedDict
+from colorama import init as colorama_init
+from colorama import Fore, Back, Style
+from configparser import ConfigParser
+from unidecode import unidecode
+from miflora.miflora_poller import MiFloraPoller, MI_BATTERY, MI_CONDUCTIVITY, MI_LIGHT, MI_MOISTURE, MI_TEMPERATURE
+from btlewrap import BluepyBackend, GatttoolBackend, BluetoothBackendException
+from bluepy.btle import BTLEException, UUID, Peripheral, Scanner, DefaultDelegate
+import paho.mqtt.client as mqtt
+import sdnotify
+from signal import signal, SIGPIPE, SIG_DFL
+from subprocess import check_output
+from re import findall
 
 config = ConfigParser(delimiters=('=', ), inline_comment_prefixes=('#'))
 config.optionxform = str

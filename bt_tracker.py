@@ -224,7 +224,7 @@ sleep(0.5)
 # Airthings Wave Plus
 try:
     print_line('Retrieving data from Airthings Wave Plus device with SN {} ...'.format(serial_number))
-    waveplus = WavePlus(serial_number)    
+    waveplus = wavethings.WavePlus(serial_number)    
 
    # header = ['Humidity', 'Radon ST avg', 'Radon LT avg', 'Temperature', 'Pressure', 'CO2 level', 'VOC level']
         
@@ -235,9 +235,9 @@ try:
         
         # extract
         humidity     = str(sensors.getValue(wavethings.SENSOR_IDX_HUMIDITY))             + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_HUMIDITY))
-        data["humidity"] = humidity
+        air_data["humidity"] = humidity
         radon_st_avg = str(sensors.getValue(wavethings.SENSOR_IDX_RADON_SHORT_TERM_AVG)) + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_RADON_SHORT_TERM_AVG))
-        data["radon_st_avg"] = radon_st_avg
+        air_data["radon_st_avg"] = radon_st_avg
         radon_lt_avg = str(sensors.getValue(wavethings.SENSOR_IDX_RADON_LONG_TERM_AVG))  + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_RADON_LONG_TERM_AVG))
         temperature  = str(sensors.getValue(wavethings.SENSOR_IDX_TEMPERATURE))          + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_TEMPERATURE))
         pressure     = str(sensors.getValue(wavethings.SENSOR_IDX_REL_ATM_PRESSURE))     + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_REL_ATM_PRESSURE))
@@ -245,7 +245,7 @@ try:
         VOC_lvl      = str(sensors.getValue(wavethings.SENSOR_IDX_VOC_LVL))              + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_VOC_LVL))
         
         # Print data
-        airthings_data = [humidity, radon_st_avg, radon_lt_avg, temperature, pressure, CO2_lvl, VOC_lvl]        
+        #airthings_data = [humidity, radon_st_avg, radon_lt_avg, temperature, pressure, CO2_lvl, VOC_lvl]        
         waveplus.disconnect()
 
         print_line('Result: {}'.format(json.dumps(air_data)))

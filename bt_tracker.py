@@ -398,7 +398,7 @@ print_line('Initialization complete, starting MQTT publish loop', console=False,
 # Raspberry Pi 4 temperature
 raspi_temp = get_temp()
 print_line('Publishing to MQTT topic "{}" : {}°C'.format(sensor_base_topic, raspi_temp))
-mqtt_client.publish('{}/{}'.format(sensor_base_topic, 'raspberrypi_temp').json.dumps(rraspi_temp))
+mqtt_client.publish('{}/{}'.format(sensor_base_topic, 'raspberrypi_temp').json.dumps(raspi_temp))
 sleep(0.5)
 
 # Airthings Wave Plus

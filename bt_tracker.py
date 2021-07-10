@@ -233,28 +233,23 @@ while True:
         waveplus.connect()
         sensors = waveplus.read()
         
-        humidity     = str(sensors.getValue(wavethings.SENSOR_IDX_HUMIDITY))             + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_HUMIDITY))
-        air_data[AIR_HUMIDITY] = humidity
-        radon_st_avg = str(sensors.getValue(wavethings.SENSOR_IDX_RADON_SHORT_TERM_AVG)) + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_RADON_SHORT_TERM_AVG))
-        air_data["radon_st_avg"] = radon_st_avg
-        radon_lt_avg = str(sensors.getValue(wavethings.SENSOR_IDX_RADON_LONG_TERM_AVG))  + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_RADON_LONG_TERM_AVG))
-        temperature  = str(sensors.getValue(wavethings.SENSOR_IDX_TEMPERATURE))          + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_TEMPERATURE))
-        pressure     = str(sensors.getValue(wavethings.SENSOR_IDX_REL_ATM_PRESSURE))     + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_REL_ATM_PRESSURE))
-        CO2_lvl      = str(sensors.getValue(wavethings.SENSOR_IDX_CO2_LVL))              + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_CO2_LVL))
-        VOC_lvl      = str(sensors.getValue(wavethings.SENSOR_IDX_VOC_LVL))              + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_VOC_LVL))
+        air_data[AIR_HUMIDITY] = str(sensors.getValue(SENSOR_IDX_HUMIDITY)) + " " + str(sensors.getUnit(SENSOR_IDX_HUMIDITY))
+        air_data[AIR_RADON_ST] = str(sensors.getValue(SENSOR_IDX_RADON_SHORT_TERM_AVG)) + " " + str(sensors.getUnit(SENSOR_IDX_RADON_SHORT_TERM_AVG))
+        air_data[AIR_RADON_LT] = str(sensors.getValue(SENSOR_IDX_RADON_LONG_TERM_AVG))  + " " + str(sensors.getUnit(SENSOR_IDX_RADON_LONG_TERM_AVG))
+        air_data[AIR_TEMPERATURE] = str(sensors.getValue(SENSOR_IDX_TEMPERATURE)) + " " + str(sensors.getUnit(SENSOR_IDX_TEMPERATURE))
+        air_data[AIR_PRESSURE] = str(sensors.getValue(SENSOR_IDX_REL_ATM_PRESSURE)) + " " + str(sensors.getUnit(SENSOR_IDX_REL_ATM_PRESSURE))
+        air_data[AIR_CO2] = str(sensors.getValue(SENSOR_IDX_CO2_LVL)) + " " + str(sensors.getUnit(SENSOR_IDX_CO2_LVL))
+        air_data[AIR_VOC] = str(sensors.getValue(SENSOR_IDX_VOC_LVL)) + " " + str(sensors.getUnit(SENSOR_IDX_VOC_LVL))
               
         waveplus.disconnect()
-
         print_line('Result: {}'.format(json.dumps(air_data)))
         print_line('Publishing to MQTT topic "{}/{}"'.format(sensor_base_topic, 'airthings'))
         print()
         mqtt_client.publish('{}/{}'.format(sensor_base_topic, 'airthings'), json.dumps(air_data))
-
         sleep(0.5)
-
     except (IOError, BluetoothBackendException, BTLEException, RuntimeError, BrokenPipeError) as e:
-      print('An exception occurred while trying to connect to the Airthings Wave Plus device {}'.format(e))
-
+      print('An exception occurred while trying to connect to the Airthings Wave Plus device:')
+      print('{}'.format(e))
     finally: 
         waveplus.disconnect()
 

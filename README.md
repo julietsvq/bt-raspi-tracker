@@ -152,8 +152,8 @@ journalctl -u bttracker.service --since "1 minutes ago"
 
 ## Integration
 
-Data will be published to the MQTT broker topic "sensor/sensorname`" (e.g. `sensor/raspberrypi_temp`).
-Data for the MiFlora sensors will be published to the MQTT broker topic "miflora/sensorname`" (e.g. `miflora/petunia`).
+Data will be published to the MQTT broker topic "sensor/sensorname" (e.g. sensor/raspberrypi_temp).
+Data for the MiFlora sensors will be published to the MQTT broker topic "miflora/sensorname" (e.g. miflora/petunia).
 
 This data can be subscribed to and processed by other applications.
 From this point forward your options are endless.

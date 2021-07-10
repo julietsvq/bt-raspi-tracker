@@ -246,7 +246,17 @@ try:
     print_line('Result: {}'.format(json.dumps(air_data)))
     print()
 
+    print_line('Publishing to MQTT topic "{}/{}"'.format(sensor_base_topic, 'airthings'))
+    print()
+    mqtt_client.publish('{}/{}'.format(sensor_base_topic, 'airthings'), json.dumps(air_data))
+
     sleep(0.5)
+
+except:
+  print("An exception occurred while trying to connect to the Airthings Wave Plus device")
+
+finally: 
+    waveplus.disconnect()
 
 # MiFlora sensors
 while True:

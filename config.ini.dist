@@ -65,3 +65,6 @@
 #Schefflera@Living = C4:7C:8D:11:22:33
 #JapaneseBonsai    = C4:7C:8D:44:55:66
 #Petunia@Balcony   = C4:7C:8D:77:88:99
+
+[Airthings]
+#serial_number = 0123456789

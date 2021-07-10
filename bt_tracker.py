@@ -14,12 +14,13 @@ from configparser import ConfigParser
 from unidecode import unidecode
 from miflora.miflora_poller import MiFloraPoller, MI_BATTERY, MI_CONDUCTIVITY, MI_LIGHT, MI_MOISTURE, MI_TEMPERATURE
 from btlewrap import BluepyBackend, GatttoolBackend, BluetoothBackendException
-from bluepy.btle import BTLEException
+from bluepy.btle import BTLEException, UUID, Peripheral, Scanner, DefaultDelegate
 import paho.mqtt.client as mqtt
 import sdnotify
 from signal import signal, SIGPIPE, SIG_DFL
 from subprocess import check_output
 from re import findall
+import wavethings
 signal(SIGPIPE,SIG_DFL)
 
 project_name = 'Bluetooth Tracker MQTT Client/Daemon'
@@ -93,6 +94,21 @@ def get_temp():
     temp = check_output(["vcgencmd","measure_temp"]).decode("UTF-8")
     return(findall("\d+\.\d+",temp)[0])
 
+def parseSerialNumber(ManuDataHexStr):
+    if (ManuDataHexStr == None or ManuDataHexStr == "None"):
+        SN = "Unknown"
+    else:
+        ManuData = bytearray.fromhex(ManuDataHexStr)
+
+        if (((ManuData[1] << 8) | ManuData[0]) == 0x0334):
+            SN  =  ManuData[2]
+            SN |= (ManuData[3] << 8)
+            SN |= (ManuData[4] << 16)
+            SN |= (ManuData[5] << 24)
+        else:
+            SN = "Unknown"
+    return SN
+
 # Load configuration file
 config_dir = parse_args.config_dir
 
@@ -121,10 +137,15 @@ if not config['Sensors']:
     print_line('No sensors found in configuration file "config.ini"', error=True, sd_notify=True)
     sys.exit(1)
 
+if not config['Airthings']:
+    print_line('You need to specify your Airthings Wave Plus device serial number in configuration file "config.ini"', error=True, sd_notify=True)
+    sys.exit(1)
+
+serial_number = config['Airthings'].getint('serial_number')
+
 print_line('Configuration accepted', console=False, sd_notify=True)
 
 # MQTT connection
-
 print_line('Connecting to MQTT broker ...')
 mqtt_client = mqtt.Client()
 mqtt_client.on_connect = on_connect
@@ -262,3 +283,5 @@ while True:
         print_line('Execution finished in non-daemon-mode', sd_notify=True)
         mqtt_client.disconnect()
         break
+
+

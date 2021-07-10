@@ -213,53 +213,53 @@ print_line('Initialization complete, starting MQTT publish loop', console=False,
 
 
 # Sensor data retrieval and publication
+while True:
 
-# Raspberry Pi 4 temperature
-raspi_temp = get_temp()
-print_line('Publishing to MQTT topic "{}" : {}°C'.format(sensor_base_topic, raspi_temp))
-print()
-mqtt_client.publish('{}/{}'.format(sensor_base_topic, 'raspberrypi_temp'), json.dumps(raspi_temp))
-sleep(0.5)
-
-# Airthings Wave Plus
-try:
-    print_line('Retrieving data from Airthings Wave Plus device with serial number {} ...'.format(serial_number))
-    waveplus = wavethings.WavePlus(serial_number)    
-
-    air_data = OrderedDict()
-    waveplus.connect()
-    sensors = waveplus.read()
-        
-    humidity     = str(sensors.getValue(wavethings.SENSOR_IDX_HUMIDITY))             + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_HUMIDITY))
-    air_data["humidity"] = humidity
-    radon_st_avg = str(sensors.getValue(wavethings.SENSOR_IDX_RADON_SHORT_TERM_AVG)) + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_RADON_SHORT_TERM_AVG))
-    air_data["radon_st_avg"] = radon_st_avg
-    radon_lt_avg = str(sensors.getValue(wavethings.SENSOR_IDX_RADON_LONG_TERM_AVG))  + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_RADON_LONG_TERM_AVG))
-    temperature  = str(sensors.getValue(wavethings.SENSOR_IDX_TEMPERATURE))          + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_TEMPERATURE))
-    pressure     = str(sensors.getValue(wavethings.SENSOR_IDX_REL_ATM_PRESSURE))     + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_REL_ATM_PRESSURE))
-    CO2_lvl      = str(sensors.getValue(wavethings.SENSOR_IDX_CO2_LVL))              + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_CO2_LVL))
-    VOC_lvl      = str(sensors.getValue(wavethings.SENSOR_IDX_VOC_LVL))              + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_VOC_LVL))
-        
-    #airthings_data = [humidity, radon_st_avg, radon_lt_avg, temperature, pressure, CO2_lvl, VOC_lvl]        
-    waveplus.disconnect()
-
-    print_line('Result: {}'.format(json.dumps(air_data)))
+    # Raspberry Pi 4 temperature
+    raspi_temp = get_temp()
+    print_line('Publishing to MQTT topic "{}" : {}°C'.format(sensor_base_topic, raspi_temp))
     print()
-
-    print_line('Publishing to MQTT topic "{}/{}"'.format(sensor_base_topic, 'airthings'))
-    print()
-    mqtt_client.publish('{}/{}'.format(sensor_base_topic, 'airthings'), json.dumps(air_data))
-
+    mqtt_client.publish('{}/{}'.format(sensor_base_topic, 'raspberrypi_temp'), json.dumps(raspi_temp))
     sleep(0.5)
 
-except:
-  print("An exception occurred while trying to connect to the Airthings Wave Plus device")
+    # Airthings Wave Plus
+    try:
+        print_line('Retrieving data from Airthings Wave Plus device with serial number {} ...'.format(serial_number))
+        waveplus = wavethings.WavePlus(serial_number)    
 
-finally: 
-    waveplus.disconnect()
+        air_data = OrderedDict()
+        waveplus.connect()
+        sensors = waveplus.read()
+        
+        humidity     = str(sensors.getValue(wavethings.SENSOR_IDX_HUMIDITY))             + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_HUMIDITY))
+        air_data["humidity"] = humidity
+        radon_st_avg = str(sensors.getValue(wavethings.SENSOR_IDX_RADON_SHORT_TERM_AVG)) + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_RADON_SHORT_TERM_AVG))
+        air_data["radon_st_avg"] = radon_st_avg
+        radon_lt_avg = str(sensors.getValue(wavethings.SENSOR_IDX_RADON_LONG_TERM_AVG))  + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_RADON_LONG_TERM_AVG))
+        temperature  = str(sensors.getValue(wavethings.SENSOR_IDX_TEMPERATURE))          + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_TEMPERATURE))
+        pressure     = str(sensors.getValue(wavethings.SENSOR_IDX_REL_ATM_PRESSURE))     + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_REL_ATM_PRESSURE))
+        CO2_lvl      = str(sensors.getValue(wavethings.SENSOR_IDX_CO2_LVL))              + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_CO2_LVL))
+        VOC_lvl      = str(sensors.getValue(wavethings.SENSOR_IDX_VOC_LVL))              + " " + str(sensors.getUnit(wavethings.SENSOR_IDX_VOC_LVL))
+        
+        #airthings_data = [humidity, radon_st_avg, radon_lt_avg, temperature, pressure, CO2_lvl, VOC_lvl]        
+        waveplus.disconnect()
 
-# MiFlora sensors
-while True:
+        print_line('Result: {}'.format(json.dumps(air_data)))
+        print()
+
+        print_line('Publishing to MQTT topic "{}/{}"'.format(sensor_base_topic, 'airthings'))
+        print()
+        mqtt_client.publish('{}/{}'.format(sensor_base_topic, 'airthings'), json.dumps(air_data))
+
+        sleep(0.5)
+
+    except:
+      print("An exception occurred while trying to connect to the Airthings Wave Plus device")
+
+    finally: 
+        waveplus.disconnect()
+
+    # MiFlora sensors
     for [flora_name, flora] in flores.items():
         data = OrderedDict()
         attempts = 2

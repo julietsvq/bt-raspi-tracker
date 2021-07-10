@@ -123,7 +123,7 @@ else:
 default_sensor_base_topic = 'sensor'
 
 miflora_base_topic = config['MQTT'].get('miflora_base_topic', default_miflora_base_topic).lower()
-sensor_base_topic = config['MQTT'].get('sensor_base_topic', default_base_topic).lower()
+sensor_base_topic = config['MQTT'].get('sensor_base_topic', default_sensor_base_topic).lower()
 sleep_period = config['Daemon'].getint('period', 300)
 miflora_cache_timeout = sleep_period - 1
 

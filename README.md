@@ -39,9 +39,9 @@ The Mi Flora sensor offers the following plant and soil readings:
 | Name            | Description |
 |-----------------|-------------|
 | `temperature`   | Air temperature, in [°C] (0.1°C resolution) |
-| `light`         | [Sunlight intensity](https://aquarium-digest.com/tag/lumenslux-requirements-of-a-cannabis-plant/), in [lux] |
-| `moisture`      | [Soil moisture](https://observant.zendesk.com/hc/en-us/articles/208067926-Monitoring-Soil-Moisture-for-Optimal-Crop-Growth), in [%] |
-| `conductivity`  | [Soil fertility](https://www.plantcaretools.com/measure-fertilization-with-ec-meters-for-plants-faq), in [µS/cm] |
+| `light`         | Sunlight intensity, in [lux] |
+| `moisture`      | Soil moisture, in [%] |
+| `conductivity`  | Soil fertility, in [µS/cm] |
 | `battery`       | Sensor battery level, in [%] |
 
 ## Prerequisites
@@ -144,10 +144,23 @@ sudo systemctl status bt_tracker.service
 sudo systemctl enable bt_tracker.service
 ```
 
-To see daemon logs
+To see daemon service logs
 
 ```shell
 journalctl -u bttracker.service --since "1 minutes ago"
+```
+
+To remove the daemon service: 
+
+```shell
+sudo systemctl stop bttracker.service
+sudo systemctl disable bttracker.service
+sudo rm /etc/systemd/system/bttracker.service
+sudo rm /etc/systemd/system/bttracker.service # and symlinks that might be related*
+sudo rm /usr/lib/systemd/system/bttracker.service 
+sudo rm /usr/lib/systemd/system/bttracker.service # and symlinks that might be related*
+sudo systemctl daemon-reload
+sudo systemctl reset-failed
 ```
 
 ## Integration

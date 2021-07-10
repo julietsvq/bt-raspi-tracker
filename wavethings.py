@@ -2,40 +2,6 @@ from bluepy.btle import UUID, Peripheral, Scanner, DefaultDelegate
 import sys
 import time
 import struct
-import tableprint
-import ssl
-import re
-import json
-import os.path
-import argparse
-from collections import OrderedDict
-from colorama import init as colorama_init
-from colorama import Fore, Back, Style
-from configparser import ConfigParser
-from unidecode import unidecode
-from miflora.miflora_poller import MiFloraPoller, MI_BATTERY, MI_CONDUCTIVITY, MI_LIGHT, MI_MOISTURE, MI_TEMPERATURE
-from btlewrap import BluepyBackend, GatttoolBackend, BluetoothBackendException
-from bluepy.btle import BTLEException, UUID, Peripheral, Scanner, DefaultDelegate
-import paho.mqtt.client as mqtt
-import sdnotify
-from signal import signal, SIGPIPE, SIG_DFL
-from subprocess import check_output
-from re import findall
-
-config = ConfigParser(delimiters=('=', ), inline_comment_prefixes=('#'))
-config.optionxform = str
-try:
-    with open(os.path.join("", 'config.ini')) as config_file:
-        config.read_file(config_file)
-except IOError:
-    print_line('No configuration file "config.ini"', error=True, sd_notify=True)
-    sys.exit(1)
-
-if not config['Airthings']:
-    print_line('You need to specify your Airthings Wave Plus device serial number in configuration file "config.ini"', error=True, sd_notify=True)
-    sys.exit(1)
-
-SerialNumber = config['Airthings'].getint('serial_number')
 
 def parseSerialNumber(ManuDataHexStr):
     if (ManuDataHexStr == None or ManuDataHexStr == "None"):
@@ -148,41 +114,3 @@ class Sensors():
 
     def getUnit(self, sensor_index):
         return self.sensor_units[sensor_index]
-
-try:
-    #---- Initialize ----#
-    waveplus = WavePlus(SerialNumber)
-    
-    print('\nPress ctrl+C to exit program\n')
-    
-    print ('Device serial number: {}'.format(SerialNumber))
-
-    header = ['Humidity', 'Radon ST avg', 'Radon LT avg', 'Temperature', 'Pressure', 'CO2 level', 'VOC level']
-    
-    print(tableprint.header(header, width=12))
-        
-    while True:
-        
-        waveplus.connect()
-        
-        # read values
-        sensors = waveplus.read()
-        
-        # extract
-        humidity     = str(sensors.getValue(SENSOR_IDX_HUMIDITY))             + " " + str(sensors.getUnit(SENSOR_IDX_HUMIDITY))
-        radon_st_avg = str(sensors.getValue(SENSOR_IDX_RADON_SHORT_TERM_AVG)) + " " + str(sensors.getUnit(SENSOR_IDX_RADON_SHORT_TERM_AVG))
-        radon_lt_avg = str(sensors.getValue(SENSOR_IDX_RADON_LONG_TERM_AVG))  + " " + str(sensors.getUnit(SENSOR_IDX_RADON_LONG_TERM_AVG))
-        temperature  = str(sensors.getValue(SENSOR_IDX_TEMPERATURE))          + " " + str(sensors.getUnit(SENSOR_IDX_TEMPERATURE))
-        pressure     = str(sensors.getValue(SENSOR_IDX_REL_ATM_PRESSURE))     + " " + str(sensors.getUnit(SENSOR_IDX_REL_ATM_PRESSURE))
-        CO2_lvl      = str(sensors.getValue(SENSOR_IDX_CO2_LVL))              + " " + str(sensors.getUnit(SENSOR_IDX_CO2_LVL))
-        VOC_lvl      = str(sensors.getValue(SENSOR_IDX_VOC_LVL))              + " " + str(sensors.getUnit(SENSOR_IDX_VOC_LVL))
-        
-        # Print data
-        data = [humidity, radon_st_avg, radon_lt_avg, temperature, pressure, CO2_lvl, VOC_lvl]
-        
-        print(tableprint.row(data, width=12))
-        
-        waveplus.disconnect()
-            
-finally:
-    waveplus.disconnect()

@@ -18,10 +18,12 @@ from bluepy.btle import BTLEException
 import paho.mqtt.client as mqtt
 import sdnotify
 from signal import signal, SIGPIPE, SIG_DFL
+from subprocess import check_output
+from re import findall
 signal(SIGPIPE,SIG_DFL)
 
-project_name = 'Xiaomi Mi Flora Plant Sensor MQTT Client/Daemon'
-project_url = 'https://github.com/ThomDietrich/miflora-mqtt-daemon'
+project_name = 'Bluetooth Tracker MQTT Client/Daemon'
+project_url = 'https://github.com/julietsvq/bt-raspi-tracker'
 
 parameters = OrderedDict([
     (MI_LIGHT, dict(name="LightIntensity", name_pretty='Sunlight Intensity', typeformat='%d', unit='lux', device_class="illuminance")),
@@ -87,6 +89,10 @@ def on_publish(client, userdata, mid):
     #print_line('Data successfully published.')
     pass
 
+def get_temp():
+    temp = check_output(["vcgencmd","measure_temp"]).decode("UTF-8")
+    return(findall("\d+\.\d+",temp)[0])
+
 # Load configuration file
 config_dir = parse_args.config_dir
 
@@ -104,17 +110,20 @@ used_adapter = config['General'].get('adapter', 'hci0')
 daemon_enabled = config['Daemon'].getboolean('enabled', True)
 
 if reporting_mode == 'mqtt-homie':
-    default_base_topic = 'homie'
+    default_miflora_base_topic = 'homie'
 elif reporting_mode == 'homeassistant-mqtt':
-    default_base_topic = 'homeassistant'
+    default_miflora_base_topic = 'homeassistant'
 elif reporting_mode == 'thingsboard-json':
-    default_base_topic = 'v1/devices/me/telemetry'
+    default_miflora_base_topic = 'v1/devices/me/telemetry'
 elif reporting_mode == 'wirenboard-mqtt':
-    default_base_topic = ''
+    default_miflora_base_topic = ''
 else:
-    default_base_topic = 'miflora'
+    default_miflora_base_topic = 'miflora'
 
-base_topic = config['MQTT'].get('base_topic', default_base_topic).lower()
+default_sensor_base_topic = 'sensor'
+
+miflora_base_topic = config['MQTT'].get('miflora_base_topic', default_miflora_base_topic).lower()
+sensor_base_topic = config['MQTT'].get('sensor_base_topic', default_base_topic).lower()
 sleep_period = config['Daemon'].getint('period', 300)
 miflora_cache_timeout = sleep_period - 1
 
@@ -125,8 +134,8 @@ if reporting_mode not in ['mqtt-json', 'mqtt-homie', 'json', 'mqtt-smarthome', '
 if not config['Sensors']:
     print_line('No sensors found in configuration file "config.ini"', error=True, sd_notify=True)
     sys.exit(1)
-if reporting_mode == 'wirenboard-mqtt' and base_topic:
-    print_line('Parameter "base_topic" ignored for "reporting_method = wirenboard-mqtt"', warning=True, sd_notify=True)
+if reporting_mode == 'wirenboard-mqtt' and miflora_base_topic:
+    print_line('Parameter "miflora_base_topic" ignored for "reporting_method = wirenboard-mqtt"', warning=True, sd_notify=True)
 
 
 print_line('Configuration accepted', console=False, sd_notify=True)
@@ -138,9 +147,9 @@ if reporting_mode in ['mqtt-json', 'mqtt-smarthome', 'homeassistant-mqtt', 'thin
     mqtt_client.on_connect = on_connect
     mqtt_client.on_publish = on_publish
     if reporting_mode == 'mqtt-json':
-        mqtt_client.will_set('{}/$announce'.format(base_topic), payload='{}', retain=True)
+        mqtt_client.will_set('{}/$announce'.format(miflora_base_topic), payload='{}', retain=True)
     elif reporting_mode == 'mqtt-smarthome':
-        mqtt_client.will_set('{}/connected'.format(base_topic), payload='0', retain=True)
+        mqtt_client.will_set('{}/connected'.format(miflora_base_topic), payload='0', retain=True)
 
     if config['MQTT'].getboolean('tls', False):
         # According to the docs, setting PROTOCOL_SSLv23 "Selects the highest protocol version
@@ -167,7 +176,7 @@ if reporting_mode in ['mqtt-json', 'mqtt-smarthome', 'homeassistant-mqtt', 'thin
         sys.exit(1)
     else:
         if reporting_mode == 'mqtt-smarthome':
-            mqtt_client.publish('{}/connected'.format(base_topic), payload='1', retain=True)
+            mqtt_client.publish('{}/connected'.format(miflora_base_topic), payload='1', retain=True)
         if reporting_mode != 'thingsboard-json':
             mqtt_client.loop_start()
             sleep(1.0) # some slack to establish the connection
@@ -226,9 +235,9 @@ if reporting_mode == 'mqtt-json':
     flores_info = dict()
     for [flora_name, flora] in flores.items():
         flora_info = {key: value for key, value in flora.items() if key not in ['poller', 'stats']}
-        flora_info['topic'] = '{}/{}'.format(base_topic, flora_name)
+        flora_info['topic'] = '{}/{}'.format(miflora_base_topic, flora_name)
         flores_info[flora_name] = flora_info
-    mqtt_client.publish('{}/$announce'.format(base_topic), json.dumps(flores_info), retain=True)
+    mqtt_client.publish('{}/$announce'.format(miflora_base_topic), json.dumps(flores_info), retain=True)
     sleep(0.5) # some slack for the publish roundtrip and callback function
     print()
 elif reporting_mode == 'mqtt-homie':
@@ -240,7 +249,7 @@ elif reporting_mode == 'mqtt-homie':
         mqtt_client[flora_name.lower()] = mqtt.Client(flora_name.lower())
         mqtt_client[flora_name.lower()].on_connect = on_connect
         mqtt_client[flora_name.lower()].on_publish = on_publish
-        mqtt_client[flora_name.lower()].will_set('{}/{}/$state'.format(base_topic, flora_name.lower()), payload='disconnected', retain=True)
+        mqtt_client[flora_name.lower()].will_set('{}/{}/$state'.format(miflora_base_topic, flora_name.lower()), payload='disconnected', retain=True)
 
         if config['MQTT'].getboolean('tls', False):
             # According to the docs, setting PROTOCOL_SSLv23 "Selects the highest protocol version
@@ -269,7 +278,7 @@ elif reporting_mode == 'mqtt-homie':
             mqtt_client[flora_name.lower()].loop_start()
             sleep(1.0) # some slack to establish the connection
 
-        topic_path = '{}/{}'.format(base_topic, flora_name.lower())
+        topic_path = '{}/{}'.format(miflora_base_topic, flora_name.lower())
 
         mqtt_client[flora_name.lower()].publish('{}/$homie'.format(topic_path), '3.0', 1, True)
         mqtt_client[flora_name.lower()].publish('{}/$name'.format(topic_path), flora['name_pretty'], 1, True)
@@ -326,7 +335,7 @@ elif reporting_mode == 'mqtt-homie':
 elif reporting_mode == 'homeassistant-mqtt':
     print_line('Announcing Mi Flora devices to MQTT broker for auto-discovery ...')
     for [flora_name, flora] in flores.items():
-        state_topic = '{}/sensor/{}/state'.format(base_topic, flora_name.lower())
+        state_topic = '{}/sensor/{}/state'.format(miflora_base_topic, flora_name.lower())
         for [sensor, params] in parameters.items():
             discovery_topic = 'homeassistant/sensor/{}/{}/config'.format(flora_name.lower(), sensor)
             payload = OrderedDict()
@@ -351,7 +360,7 @@ elif reporting_mode == 'gladys-mqtt':
     print_line('Announcing Mi Flora devices to MQTT broker for auto-discovery ...')
     
     for [flora_name, flora] in flores.items():
-        topic_path = '{}/mqtt:miflora:{}/feature'.format(base_topic, flora_name.lower())
+        topic_path = '{}/mqtt:miflora:{}/feature'.format(miflora_base_topic, flora_name.lower())
         data = OrderedDict()
         for param,_ in parameters.items():
             data[param] = flora['poller'].parameter_value(param)
@@ -385,6 +394,16 @@ print_line('Initialization complete, starting MQTT publish loop', console=False,
 
 
 # Sensor data retrieval and publication
+
+# Raspberry Pi 4 temperature
+raspi_temp = get_temp()
+print_line('Publishing to MQTT topic "{}" : {}°C'.format(sensor_base_topic, raspi_temp))
+mqtt_client.publish('{}/{}'.format(sensor_base_topic, 'raspberrypi_temp').json.dumps(rraspi_temp))
+sleep(0.5)
+
+# Airthings Wave Plus
+
+# MiFlora sensors
 while True:
     for [flora_name, flora] in flores.items():
         data = OrderedDict()
@@ -410,7 +429,7 @@ while True:
         if not flora['poller']._cache:
             flora['stats']['failure'] += 1
             if reporting_mode == 'mqtt-homie':
-                mqtt_client[flora_name.lower()].publish('{}/{}/$state'.format(base_topic, flora_name.lower()), 'disconnected', 1, True)
+                mqtt_client[flora_name.lower()].publish('{}/{}/$state'.format(miflora_base_topic, flora_name.lower()), 'disconnected', 1, True)
             print_line('Failed to retrieve data from Mi Flora sensor "{}" ({}), success rate: {:.0%}'.format(
                 flora['name_pretty'], flora['mac'], flora['stats']['success']/flora['stats']['count']
                 ), error = True, sd_notify = True)
@@ -424,38 +443,38 @@ while True:
         print_line('Result: {}'.format(json.dumps(data)))
 
         if reporting_mode == 'mqtt-json':
-            print_line('Publishing to MQTT topic "{}/{}"'.format(base_topic, flora_name))
-            mqtt_client.publish('{}/{}'.format(base_topic, flora_name), json.dumps(data))
+            print_line('Publishing to MQTT topic "{}/{}"'.format(miflora_base_topic, flora_name))
+            mqtt_client.publish('{}/{}'.format(miflora_base_topic, flora_name), json.dumps(data))
             sleep(0.5) # some slack for the publish roundtrip and callback function
         elif reporting_mode == 'thingsboard-json':
-            print_line('Publishing to MQTT topic "{}" username "{}"'.format(base_topic, flora_name))
+            print_line('Publishing to MQTT topic "{}" username "{}"'.format(miflora_base_topic, flora_name))
             mqtt_client.username_pw_set(flora_name)
             mqtt_client.reconnect()
             sleep(1.0)
-            mqtt_client.publish('{}'.format(base_topic), json.dumps(data))
+            mqtt_client.publish('{}'.format(miflora_base_topic), json.dumps(data))
             sleep(0.5) # some slack for the publish roundtrip and callback function
         elif reporting_mode == 'homeassistant-mqtt':
-            print_line('Publishing to MQTT topic "{}/sensor/{}/state"'.format(base_topic, flora_name.lower()))
-            mqtt_client.publish('{}/sensor/{}/state'.format(base_topic, flora_name.lower()), json.dumps(data))
+            print_line('Publishing to MQTT topic "{}/sensor/{}/state"'.format(miflora_base_topic, flora_name.lower()))
+            mqtt_client.publish('{}/sensor/{}/state'.format(miflora_base_topic, flora_name.lower()), json.dumps(data))
             sleep(0.5) # some slack for the publish roundtrip and callback function
         elif reporting_mode == 'gladys-mqtt':
-            print_line('Publishing to MQTT topic "{}/mqtt:miflora:{}/feature"'.format(base_topic, flora_name.lower()))
-            mqtt_client.publish('{}/mqtt:miflora:{}/feature'.format(base_topic, flora_name.lower()), json.dumps(data))
+            print_line('Publishing to MQTT topic "{}/mqtt:miflora:{}/feature"'.format(miflora_base_topic, flora_name.lower()))
+            mqtt_client.publish('{}/mqtt:miflora:{}/feature'.format(miflora_base_topic, flora_name.lower()), json.dumps(data))
             sleep(0.5) # some slack for the publish roundtrip and callback function
         elif reporting_mode == 'mqtt-homie':
-            print_line('Publishing data to MQTT base topic "{}/{}"'.format(base_topic, flora_name.lower()))
-            mqtt_client[flora_name.lower()].publish('{}/{}/$state'.format(base_topic, flora_name.lower()), 'ready', 1, True)
+            print_line('Publishing data to MQTT base topic "{}/{}"'.format(miflora_base_topic, flora_name.lower()))
+            mqtt_client[flora_name.lower()].publish('{}/{}/$state'.format(miflora_base_topic, flora_name.lower()), 'ready', 1, True)
             for [param, value] in data.items():
-                mqtt_client[flora_name.lower()].publish('{}/{}/sensor/{}'.format(base_topic, flora_name.lower(), param), value, 1, True)
-            mqtt_client[flora_name.lower()].publish('{}/{}/$stats/timestamp'.format(base_topic, flora_name.lower()), strftime('%Y-%m-%dT%H:%M:%S%z', localtime()), 1, True)
+                mqtt_client[flora_name.lower()].publish('{}/{}/sensor/{}'.format(miflora_base_topic, flora_name.lower(), param), value, 1, True)
+            mqtt_client[flora_name.lower()].publish('{}/{}/$stats/timestamp'.format(miflora_base_topic, flora_name.lower()), strftime('%Y-%m-%dT%H:%M:%S%z', localtime()), 1, True)
             sleep(0.5) # some slack for the publish roundtrip and callback function
         elif reporting_mode == 'mqtt-smarthome':
             for [param, value] in data.items():
-                print_line('Publishing data to MQTT topic "{}/status/{}/{}"'.format(base_topic, flora_name, param))
+                print_line('Publishing data to MQTT topic "{}/status/{}/{}"'.format(miflora_base_topic, flora_name, param))
                 payload = dict()
                 payload['val'] = value
                 payload['ts'] = int(round(time() * 1000))
-                mqtt_client.publish('{}/status/{}/{}'.format(base_topic, flora_name, param), json.dumps(payload), retain=True)
+                mqtt_client.publish('{}/status/{}/{}'.format(miflora_base_topic, flora_name, param), json.dumps(payload), retain=True)
             sleep(0.5)  # some slack for the publish roundtrip and callback function
         elif reporting_mode == 'wirenboard-mqtt':
             for [param, value] in data.items():

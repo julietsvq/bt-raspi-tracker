@@ -1,4 +1,4 @@
-# Xiaomi Mi Flora Plant Sensor MQTT Client/Daemon
+# Bluetooth devices Sensor MQTT Client/Daemon
 
 A simple Linux python script to query bluetooth devices, including the Mi Flora plant and the Airthings Wave Plus sensor, and send the data to an **MQTT** broker,
 e.g., the famous [Eclipse Mosquitto](https://projects.eclipse.org/projects/technology.mosquitto).
@@ -8,6 +8,12 @@ After data made the hop to the MQTT broker it can be used by home automation sof
 
 The program can be executed in **daemon mode** to run continuously in the background, e.g., as a systemd service.
 
+Based on: 
+* https://github.com/open-homeautomation/miflora
+* https://github.com/ThomDietrich/miflora-mqtt-daemon
+* https://github.com/Airthings/waveplus-reader
+* https://thingsmatic.com/2017/02/01/self-monitoring-a-raspberry-pi-with-mqtt/
+
 ## About Mi Flora
 * [Xiaomi Mi Flora sensors](https://xiaomi-mi.com/sockets-and-sensors/xiaomi-huahuacaocao-flower-care-smart-monitor) are meant to keep your plants alive by monitoring soil moisture, soil conductivity and light conditions.
 
@@ -16,17 +22,16 @@ The program can be executed in **daemon mode** to run continuously in the backgr
 
 ## Features
 
+* Currently monitors: Mi Flora sensors, Airthings Wave Plus device, Raspberry Pi temperature (in case you wish to place it outside)
 * Tested with Mi Flora firmware 3.2.1
 * Tested with VegTrug firmware 3.3.1 (MAC prefix "80:EA:CA")
 * Tested on Raspberry Pi 4
-* Build on top of [open-homeautomation/miflora](https://github.com/open-homeautomation/miflora)
 * Highly configurable
 * Data publication via MQTT
 * Configurable topic and payload
 * MQTT authentication support
 * No special/root privileges needed
 * Linux daemon / systemd service, sd\_notify messages generated
-
 
 ### Readings
 
@@ -92,6 +97,7 @@ Scan for other bluethooth devices:
 
 ```shell
 $> sudo hcitool lescan
+```
 
 By the way:
 Interfacing your Mi Flora sensor with this program is harmless.
@@ -131,6 +137,11 @@ This can be done either by using the internal daemon or cron.
    sudo systemctl status bt_tracker.service
 
    sudo systemctl enable bt_tracker.service
+   ```
+
+To see daemon logs: 
+   ```shell
+journalctl -u bttracker.service --since "1 minutes ago"
    ```
 
 ## Integration

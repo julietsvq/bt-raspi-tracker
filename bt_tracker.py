@@ -252,8 +252,8 @@ while True:
 
         sleep(0.5)
 
-    except:
-      print("An exception occurred while trying to connect to the Airthings Wave Plus device")
+    except (IOError, BluetoothBackendException, BTLEException, RuntimeError, BrokenPipeError) as e:
+      print('An exception occurred while trying to connect to the Airthings Wave Plus device {}'.format(e))
 
     finally: 
         waveplus.disconnect()

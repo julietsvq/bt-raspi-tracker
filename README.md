@@ -23,8 +23,7 @@ Based on:
 ## Features
 
 * Currently monitors: Mi Flora sensors, Airthings Wave Plus device, Raspberry Pi temperature (in case you wish to place it outside)
-* Tested with Mi Flora firmware 3.2.1
-* Tested with VegTrug firmware 3.3.1 (MAC prefix "80:EA:CA")
+* Tested with Mi Flora / VegTrug firmware 3.2.1
 * Tested on Raspberry Pi 4
 * Highly configurable
 * Data publication via MQTT
@@ -125,6 +124,10 @@ You most probably want to execute the program **continuously in the background**
 This can be done either by using the internal daemon or cron.
 
 **Attention:** Daemon mode must be enabled in the configuration file (default).
+(if you run the code to get the raspi temp (vcgencmd command) you will need to add this group to the daemon user: 
+   ```shell
+	sudo usermod -aG video daemon
+	```
 
 1. Systemd service - on systemd powered systems the **recommended** option
 
@@ -141,7 +144,7 @@ This can be done either by using the internal daemon or cron.
 
 To see daemon logs: 
    ```shell
-journalctl -u bttracker.service --since "1 minutes ago"
+	journalctl -u bttracker.service --since "1 minutes ago"
    ```
 
 ## Integration

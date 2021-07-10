@@ -20,7 +20,6 @@ import sdnotify
 from signal import signal, SIGPIPE, SIG_DFL
 from subprocess import check_output
 from re import findall
-import wavethings
 signal(SIGPIPE,SIG_DFL)
 
 project_name = 'Bluetooth Tracker MQTT Client/Daemon'
@@ -93,21 +92,6 @@ def on_publish(client, userdata, mid):
 def get_temp():
     temp = check_output(["vcgencmd","measure_temp"]).decode("UTF-8")
     return(findall("\d+\.\d+",temp)[0])
-
-def parseSerialNumber(ManuDataHexStr):
-    if (ManuDataHexStr == None or ManuDataHexStr == "None"):
-        SN = "Unknown"
-    else:
-        ManuData = bytearray.fromhex(ManuDataHexStr)
-
-        if (((ManuData[1] << 8) | ManuData[0]) == 0x0334):
-            SN  =  ManuData[2]
-            SN |= (ManuData[3] << 8)
-            SN |= (ManuData[4] << 16)
-            SN |= (ManuData[5] << 24)
-        else:
-            SN = "Unknown"
-    return SN
 
 # Load configuration file
 config_dir = parse_args.config_dir

@@ -38,8 +38,23 @@ if not config['Airthings']:
 
 SerialNumber = config['Airthings'].getint('serial_number')
 
+def parseSerialNumber(ManuDataHexStr):
+    if (ManuDataHexStr == None or ManuDataHexStr == "None"):
+        SN = "Unknown"
+    else:
+        ManuData = bytearray.fromhex(ManuDataHexStr)
+
+        if (((ManuData[1] << 8) | ManuData[0]) == 0x0334):
+            SN  =  ManuData[2]
+            SN |= (ManuData[3] << 8)
+            SN |= (ManuData[4] << 16)
+            SN |= (ManuData[5] << 24)
+        else:
+            SN = "Unknown"
+    return SN
+
 #Class WavePlus
-class WavePlus():       
+class WavePlus():    
     def __init__(self, SerialNumber):
         self.periph        = None
         self.curr_val_char = None
@@ -90,21 +105,6 @@ class WavePlus():
             self.periph.disconnect()
             self.periph = None
             self.curr_val_char = None
-
-    def parseSerialNumber(ManuDataHexStr):
-        if (ManuDataHexStr == None or ManuDataHexStr == "None"):
-            SN = "Unknown"
-        else:
-            ManuData = bytearray.fromhex(ManuDataHexStr)
-
-            if (((ManuData[1] << 8) | ManuData[0]) == 0x0334):
-                SN  =  ManuData[2]
-                SN |= (ManuData[3] << 8)
-                SN |= (ManuData[4] << 16)
-                SN |= (ManuData[5] << 24)
-            else:
-                SN = "Unknown"
-        return SN
 
 # Class Sensor and sensor definitions
 
